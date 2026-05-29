@@ -291,7 +291,7 @@ function setupSajuForm() {
                 if (!response.ok) {
                     const errorJson = await response.json();
                     console.error("Gemini API Error Response:", errorJson);
-                    throw new Error('API 호출 실패');
+                    throw new Error(`API 호출 실패 (Status: ${response.status}) - ${JSON.stringify(errorJson.error || errorJson)}`);
                 }
                 
                 const result = await response.json();
@@ -312,27 +312,27 @@ function setupSajuForm() {
                     if (jsonMatch) {
                         fortuneData = JSON.parse(jsonMatch[0]);
                     } else {
-                        throw new Error('데이터 해석 실패');
+                        throw new Error('데이터 해석 실패 (JSON 파싱 오류)');
                     }
                 }
             } catch (apiErr) {
                 console.error("API or Parsing Fail:", apiErr);
-                // API 실패 시 기본 데이터 사용
-                fortuneData = getMockSajuData();
-                fortuneData.isDemo = true;
+                // API 실패 시 구체적인 에러 메시지 캡처하여 사용자에게 전달
+                throw apiErr; 
             }
 
             renderSajuResult({
                 saju: { ganji: [sajuData.year, sajuData.month, sajuData.day, sajuData.hour] },
                 fortune: fortuneData,
-                isDemo: fortuneData.isDemo || false
+                isDemo: false
             });
         } catch (error) {
             console.error('Fortune Error:', error);
-            // 에러 시 사용자에게 데모 데이터를 보여주되, 상황을 설명함
+            // 에러 시 사용자에게 데모 데이터를 보여주되, 상단에 빨간 박스로 구체적인 원인 표시
             renderSajuResult({
                 ...getMockSajuData(),
-                isDemo: true
+                isDemo: true,
+                errorDetail: error.message
             });
         } finally {
             getFortuneBtn.disabled = false;
@@ -345,11 +345,24 @@ function renderSajuResult(data) {
     const resultContainer = document.getElementById('saju-result-container');
     resultContainer.style.display = 'block';
     
-    const { saju, fortune, isDemo } = data;
+    const { saju, fortune, isDemo, errorDetail } = data;
     const [y, m, d, h] = saju ? saju.ganji : ["-", "-", "-", "-"];
 
+    let errorBanner = "";
+    if (isDemo) {
+        errorBanner = `
+            <div style="padding: 15px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 12px; margin-bottom: 20px; font-size: 0.85rem; color: #c53030; text-align: left; line-height: 1.5;">
+                <strong style="font-size: 1rem;">⚠️ AI 연결 오류 진단</strong><br>
+                <div style="margin-top: 8px; font-family: monospace; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 6px; word-break: break-all;">
+                    ${errorDetail || "알 수 없는 오류가 발생했습니다."}
+                </div>
+                <p style="margin: 8px 0 0 0; font-size: 0.75rem; opacity: 0.8;">* 현재는 시스템에 저장된 <strong>예시 데이터</strong>가 표시되고 있습니다. 위 영어로 된 에러 내용을 복사해서 알려주시면 즉시 해결해 드리겠습니다.</p>
+            </div>
+        `;
+    }
+
     resultContainer.innerHTML = `
-        ${isDemo ? `<div style="padding: 10px; background: #fff5f5; border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem; color: #e53e3e; text-align: center;">⚠️ AI 응답 지연으로 인해 예시 데이터가 표시됩니다. 잠시 후 다시 시도해 주세요.</div>` : ''}
+        ${errorBanner}
         <div class="saju-main-layout">
             <div class="saju-visual-section">
                 <div class="saju-eight-chars">
