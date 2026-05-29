@@ -282,6 +282,7 @@ function setupSajuForm() {
 
             if (!response.ok) throw new Error('API 호출 실패');
             
+            const result = await response.json();
             const responseText = result.candidates[0].content.parts[0].text;
             let fortuneData;
             try {
