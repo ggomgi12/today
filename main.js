@@ -203,6 +203,11 @@ function setupSajuForm() {
     const getFortuneBtn = document.getElementById('get-fortune-btn');
     const resultContainer = document.getElementById('saju-result-container');
 
+    if (!getFortuneBtn) {
+        console.error("Button 'get-fortune-btn' not found in DOM!");
+        return;
+    }
+
     calendarRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             leapContainer.style.display = e.target.value === 'lunar' ? 'inline-block' : 'none';
@@ -210,6 +215,7 @@ function setupSajuForm() {
     });
 
     getFortuneBtn.addEventListener('click', async () => {
+        console.log("Fortune button CLICKED");
         const birthDate = document.getElementById('saju-birth-date').value;
         const birthHour = document.getElementById('saju-birth-hour').value;
         const isLunar = document.querySelector('input[name="calendar-type"]:checked').value === 'lunar';
@@ -227,6 +233,7 @@ function setupSajuForm() {
         resultContainer.style.display = 'none';
 
         try {
+            console.log("Processing Saju data...");
             // 1. 브라우저에서 직접 만세력 계산 (lunar-javascript)
             let lunar;
             try {
@@ -250,6 +257,8 @@ function setupSajuForm() {
                 hour: hourInt !== -1 ? (eightChar.getTime()?.toString() || "-") : (currentLang === 'ko' ? "시주 모름" : "Unknown"),
                 todayIljin: Lunar.fromDate(new Date()).getEightChar().getDay()?.toString() || "-"
             };
+
+            console.log("Calculating API call with:", sajuData);
 
             // 2. Gemini API 직접 호출
             const API_KEY = "AIzaSyB2BatYaYivn0X6a38NVDXqmhAWenlIa50";
@@ -295,6 +304,7 @@ function setupSajuForm() {
                 }
                 
                 const result = await response.json();
+                console.log("API Result received successfully");
                 
                 if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
                     console.error("Gemini Unexpected Response Structure:", result);
@@ -317,35 +327,48 @@ function setupSajuForm() {
                 }
             } catch (apiErr) {
                 console.error("API or Parsing Fail:", apiErr);
-                // API 실패 시 구체적인 에러 메시지 캡처하여 사용자에게 전달
                 throw apiErr; 
             }
 
+            console.log("Rendering result to UI...");
             renderSajuResult({
                 saju: { ganji: [sajuData.year, sajuData.month, sajuData.day, sajuData.hour] },
                 fortune: fortuneData,
                 isDemo: false
             });
         } catch (error) {
-            console.error('Fortune Error:', error);
-            // 에러 시 사용자에게 데모 데이터를 보여주되, 상단에 빨간 박스로 구체적인 원인 표시
+            console.error('Final Fortune Error Handler:', error);
+            // 에러 시 사용자에게 데모 데이터를 보여주되, fortune 객체 구조를 맞춰서 전달 (핵심 수정!)
             renderSajuResult({
-                ...getMockSajuData(),
+                fortune: getMockSajuData(),
                 isDemo: true,
                 errorDetail: error.message
             });
         } finally {
             getFortuneBtn.disabled = false;
             getFortuneBtn.textContent = currentLang === 'ko' ? '운세 보기' : 'Get Fortune';
+            console.log("Analysis process ended.");
         }
     });
 }
 
 function renderSajuResult(data) {
+    console.log("renderSajuResult CALLED with data:", data);
     const resultContainer = document.getElementById('saju-result-container');
+    if (!resultContainer) {
+        console.error("Result container 'saju-result-container' not found!");
+        return;
+    }
     resultContainer.style.display = 'block';
     
     const { saju, fortune, isDemo, errorDetail } = data;
+    
+    if (!fortune) {
+        console.error("FORTUNE OBJECT IS MISSING!");
+        resultContainer.innerHTML = `<div style="color: red; padding: 20px;">시스템 오류: 렌더링할 데이터가 없습니다.</div>`;
+        return;
+    }
+
     const [y, m, d, h] = saju ? saju.ganji : ["-", "-", "-", "-"];
 
     let errorBanner = "";
