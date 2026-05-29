@@ -187,6 +187,7 @@
         border: 1px solid oklch(0.9 0 0);
         background: var(--bg);
         font-family: var(--font-body);
+        max-width: 200px;
     }
 
     .radio-group {
