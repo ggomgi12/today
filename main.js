@@ -260,59 +260,73 @@ function setupSajuForm() {
 
             console.log("Calculating API call with:", sajuData);
 
-            // 2. Gemini API 직접 호출
+            // 2. Gemini API 호출 (안정성 강화: 여러 버전 및 모델 시도)
             const API_KEY = "AIzaSyB2BatYaYivn0X6a38NVDXqmhAWenlIa50";
             let fortuneData;
 
+            const callGemini = async () => {
+                const endpoints = [
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+                    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${API_KEY}`
+                ];
+
+                let lastError = null;
+                for (const url of endpoints) {
+                    try {
+                        console.log(`Trying Gemini API: ${url.split('?')[0]}`);
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{
+                                        text: `당신은 전문 사주풀이가입니다. 다음 사용자의 사주 정보를 바탕으로 오늘의 상세 운세와 사주 원국 풀이를 작성해 주세요.
+                                        사용자 사주 (간지): 년주 ${sajuData.year}, 월주 ${sajuData.month}, 일주 ${sajuData.day}, 시주 ${sajuData.hour}. 오늘의 일진: ${sajuData.todayIljin}.
+                                        
+                                        요청 사항:
+                                        1. 사주 원국 풀이: 각 간지(년, 월, 일, 시)가 상징하는 의미와 본인의 타고난 기질을 분석해 주세요.
+                                        2. 오늘의 상세 운세: 총운, 재물운, 연애운, 직업운, 건강운으로 나누어 상세히 설명해 주세요.
+                                        3. 행운의 추천: 옷차림과 메뉴를 추천해 주세요.
+
+                                        응답은 반드시 아래 JSON 형식으로만 해주세요:
+                                        {
+                                            "sajuAnalysis": "사주 원국에 대한 상세 분석 내용",
+                                            "fortunes": {
+                                                "total": "총운 내용",
+                                                "wealth": "재물운 내용",
+                                                "love": "연애/대인운 내용",
+                                                "job": "직업/학업운 내용",
+                                                "health": "건강운 내용"
+                                            },
+                                            "outfit": "추천 옷차림",
+                                            "menu": "추천 점심 메뉴와 이유"
+                                        }`
+                                    }]
+                                }]
+                            })
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            if (result.candidates && result.candidates[0]?.content?.parts[0]?.text) {
+                                return result.candidates[0].content.parts[0].text;
+                            }
+                        } else {
+                            const errBody = await response.json().catch(() => ({}));
+                            console.warn(`Endpoint failed: ${url}`, errBody);
+                            lastError = `Status ${response.status}: ${errBody.error?.message || "Unknown error"}`;
+                        }
+                    } catch (e) {
+                        console.warn(`Fetch error for ${url}:`, e);
+                        lastError = `연결 실패 (네트워크 또는 광고 차단기 확인): ${e.message}`;
+                    }
+                }
+                throw new Error(lastError || "모든 API 엔드포인트 호출 실패");
+            };
+
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [{
-                                text: `당신은 전문 사주풀이가입니다. 다음 사용자의 사주 정보를 바탕으로 오늘의 상세 운세와 사주 원국 풀이를 작성해 주세요.
-                                사용자 사주 (간지): 년주 ${sajuData.year}, 월주 ${sajuData.month}, 일주 ${sajuData.day}, 시주 ${sajuData.hour}. 오늘의 일진: ${sajuData.todayIljin}.
-                                
-                                요청 사항:
-                                1. 사주 원국 풀이: 각 간지(년, 월, 일, 시)가 상징하는 의미와 본인의 타고난 기질을 분석해 주세요.
-                                2. 오늘의 상세 운세: 총운, 재물운, 연애운, 직업운, 건강운으로 나누어 상세히 설명해 주세요.
-                                3. 행운의 추천: 옷차림과 메뉴를 추천해 주세요.
-
-                                응답은 반드시 아래 JSON 형식으로만 해주세요:
-                                {
-                                    "sajuAnalysis": "사주 원국에 대한 상세 분석 내용",
-                                    "fortunes": {
-                                        "total": "총운 내용",
-                                        "wealth": "재물운 내용",
-                                        "love": "연애/대인운 내용",
-                                        "job": "직업/학업운 내용",
-                                        "health": "건강운 내용"
-                                    },
-                                    "outfit": "추천 옷차림",
-                                    "menu": "추천 점심 메뉴와 이유"
-                                }`
-                            }]
-                        }]
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorJson = await response.json();
-                    console.error("Gemini API Error Response:", errorJson);
-                    throw new Error(`API 호출 실패 (Status: ${response.status}) - ${JSON.stringify(errorJson.error || errorJson)}`);
-                }
-                
-                const result = await response.json();
-                console.log("API Result received successfully");
-                
-                if (!result.candidates || !result.candidates[0] || !result.candidates[0].content) {
-                    console.error("Gemini Unexpected Response Structure:", result);
-                    throw new Error('API 응답 형식 오류');
-                }
-
-                const responseText = result.candidates[0].content.parts[0].text;
-                
+                const responseText = await callGemini();
                 try {
                     const cleanedText = responseText.replace(/```json|```/g, '').trim();
                     fortuneData = JSON.parse(cleanedText);
@@ -326,7 +340,7 @@ function setupSajuForm() {
                     }
                 }
             } catch (apiErr) {
-                console.error("API or Parsing Fail:", apiErr);
+                console.error("All API endpoints failed:", apiErr);
                 throw apiErr; 
             }
 
