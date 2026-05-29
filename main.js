@@ -254,10 +254,27 @@ function setupSajuForm() {
                 body: JSON.stringify({
                     contents: [{
                         parts: [{
-                            text: `당신은 전문 사주풀이가입니다. 다음 사용자의 사주 정보를 바탕으로 오늘의 운세를 분석해 주세요.
+                            text: `당신은 전문 사주풀이가입니다. 다음 사용자의 사주 정보를 바탕으로 오늘의 상세 운세와 사주 원국 풀이를 작성해 주세요.
                             사용자 사주 (간지): 년주 ${sajuData.year}, 월주 ${sajuData.month}, 일주 ${sajuData.day}, 시주 ${sajuData.hour}. 오늘의 일진: ${sajuData.todayIljin}.
+                            
+                            요청 사항:
+                            1. 사주 원국 풀이: 각 간지(년, 월, 일, 시)가 상징하는 의미와 본인의 타고난 기질을 분석해 주세요.
+                            2. 오늘의 상세 운세: 총운, 재물운, 연애운, 직업운, 건강운으로 나누어 상세히 설명해 주세요.
+                            3. 행운의 추천: 옷차림과 메뉴를 추천해 주세요.
+
                             응답은 반드시 아래 JSON 형식으로만 해주세요:
-                            {"fortune": "전체적인 오늘의 운세 설명", "outfit": "추천 옷차림", "menu": "추천 점심 메뉴와 이유"}`
+                            {
+                                "sajuAnalysis": "사주 원국에 대한 상세 분석 내용",
+                                "fortunes": {
+                                    "total": "총운 내용",
+                                    "wealth": "재물운 내용",
+                                    "love": "연애/대인운 내용",
+                                    "job": "직업/학업운 내용",
+                                    "health": "건강운 내용"
+                                },
+                                "outfit": "추천 옷차림",
+                                "menu": "추천 점심 메뉴와 이유"
+                            }`
                         }]
                     }]
                 })
@@ -292,16 +309,47 @@ function renderSajuResult(data) {
     const [y, m, d, h] = saju.ganji;
 
     resultContainer.innerHTML = `
-        <div class="saju-eight-chars">
-            <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '시' : 'Hour'}</span><span class="ganji">${h}</span></div>
-            <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '일' : 'Day'}</span><span class="ganji">${d}</span></div>
-            <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '월' : 'Month'}</span><span class="ganji">${m}</span></div>
-            <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '년' : 'Year'}</span><span class="ganji">${y}</span></div>
+        <div class="saju-main-layout">
+            <div class="saju-visual-section">
+                <div class="saju-eight-chars">
+                    <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '시' : 'Hour'}</span><span class="ganji">${h}</span></div>
+                    <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '일' : 'Day'}</span><span class="ganji">${d}</span></div>
+                    <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '월' : 'Month'}</span><span class="ganji">${m}</span></div>
+                    <div class="char-box"><span class="pillar">${currentLang === 'ko' ? '년' : 'Year'}</span><span class="ganji">${y}</span></div>
+                </div>
+                <div class="saju-analysis-card">
+                    <h4>📜 ${currentLang === 'ko' ? '사주 원국 풀이' : 'Saju Analysis'}</h4>
+                    <p>${fortune.sajuAnalysis}</p>
+                </div>
+            </div>
+
+            <div class="fortune-details-section">
+                <h4>🔮 ${currentLang === 'ko' ? '오늘의 상세 운세' : "Today's Detailed Fortune"}</h4>
+                <div class="fortune-grid">
+                    <div class="fortune-item">
+                        <strong>🌟 ${currentLang === 'ko' ? '총운' : 'Total'}</strong>
+                        <p>${fortune.fortunes.total}</p>
+                    </div>
+                    <div class="fortune-item">
+                        <strong>💰 ${currentLang === 'ko' ? '재물운' : 'Wealth'}</strong>
+                        <p>${fortune.fortunes.wealth}</p>
+                    </div>
+                    <div class="fortune-item">
+                        <strong>❤️ ${currentLang === 'ko' ? '연애운' : 'Love'}</strong>
+                        <p>${fortune.fortunes.love}</p>
+                    </div>
+                    <div class="fortune-item">
+                        <strong>💼 ${currentLang === 'ko' ? '직업운' : 'Job'}</strong>
+                        <p>${fortune.fortunes.job}</p>
+                    </div>
+                    <div class="fortune-item">
+                        <strong>💪 ${currentLang === 'ko' ? '건강운' : 'Health'}</strong>
+                        <p>${fortune.fortunes.health}</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="fortune-report">
-            <h4>🍀 ${currentLang === 'ko' ? '오늘의 운세' : "Today's Fortune"}</h4>
-            <p>${fortune.fortune}</p>
-        </div>
+
         <div class="recommendations">
             <div class="rec-item">
                 <span class="rec-icon">👕</span>
@@ -323,15 +371,16 @@ function renderSajuResult(data) {
 
 function getMockSajuData() {
     return {
-        saju: {
-            ganji: ["甲辰", "戊辰", "己亥", "丙寅"],
-            wuXing: "木: 2, 火: 1, 土: 3, 金: 0, 水: 2"
+        sajuAnalysis: "부드럽고 유연한 기운을 타고나 대인관계가 원만하며, 주변을 포용하는 능력이 탁월합니다. 다만 가끔 우유부단해질 수 있으니 중심을 잡는 것이 중요합니다.",
+        fortunes: {
+            total: "오늘은 대인관계에서 긍정적인 에너지가 넘치는 날입니다. 평소 서먹했던 사람과 대화를 시도해 보세요.",
+            wealth: "작은 지출이 발생할 수 있으나, 미래를 위한 투자라면 아까워하지 마세요.",
+            love: "연인이나 친구와 깊은 대화를 나누기에 최적의 날입니다. 진심이 통하는 순간이 오겠네요.",
+            job: "새로운 아이디어가 샘솟는 날입니다. 메모하는 습관을 들여보세요.",
+            health: "가벼운 산책이 컨디션 회복에 큰 도움이 됩니다. 물을 자주 마셔주세요."
         },
-        fortune: {
-            fortune: "오늘은 대인관계에서 긍정적인 에너지가 넘치는 날입니다. 평소 서먹했던 사람과 대화를 시도해 보세요. 뜻밖의 행운이 기다리고 있습니다.",
-            outfit: "차분한 파스텔 톤의 블루 셔츠와 베이지색 슬랙스를 매치해 보세요. 신뢰감을 주는 이미지가 운을 높여줍니다.",
-            menu: "따뜻한 국물이 있는 쌀국수를 추천합니다. 오행 중 '수(水)'의 기운을 보강하여 오늘 부족한 집중력을 채워줄 것입니다."
-        }
+        outfit: "차분한 파스텔 톤의 블루 셔츠와 베이지색 슬랙스를 매치해 보세요.",
+        menu: "따뜻한 국물이 있는 쌀국수를 추천합니다. 오행 중 '수(水)'의 기운을 보강해 줄 것입니다."
     };
 }
 

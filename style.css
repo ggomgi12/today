@@ -233,16 +233,23 @@
         animation: fadeIn 0.5s ease-out;
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+    .saju-main-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .saju-visual-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
     }
 
     .saju-eight-chars {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
-        margin-bottom: 2rem;
     }
 
     .char-box {
@@ -269,22 +276,74 @@
         color: var(--primary);
     }
 
-    .fortune-report {
+    .saju-analysis-card {
         background: oklch(0.98 0.02 250);
         padding: 1.5rem;
         border-radius: 20px;
-        margin-bottom: 1.5rem;
+        border-left: 5px solid var(--accent);
     }
 
-    .fortune-report h4 {
-        margin: 0 0 1rem 0;
+    .saju-analysis-card h4 {
+        margin: 0 0 0.75rem 0;
+        font-size: 1.1rem;
+        color: var(--text);
+    }
+
+    .fortune-details-section {
+        background: var(--surface);
+        padding: 2rem;
+        border-radius: 24px;
+        box-shadow: var(--shadow);
+    }
+
+    .fortune-details-section h4 {
+        margin: 0 0 1.5rem 0;
         font-family: var(--font-heading);
-        font-size: 1.25rem;
+        font-size: 1.4rem;
+        color: var(--primary);
     }
 
-    .fortune-report p {
+    .fortune-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .fortune-item {
+        padding-bottom: 1rem;
+        border-bottom: 1px dashed oklch(0.9 0 0);
+    }
+
+    .fortune-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .fortune-item strong {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1rem;
+        color: var(--text);
+    }
+
+    .fortune-item p {
         margin: 0;
-        line-height: 1.7;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        opacity: 0.85;
+    }
+
+    @media (min-width: 1024px) {
+        .saju-main-layout {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .saju-visual-section {
+            flex: 1;
+        }
+        .fortune-details-section {
+            flex: 1.5;
+        }
     }
 
     .recommendations {
