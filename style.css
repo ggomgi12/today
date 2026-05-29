@@ -187,7 +187,6 @@
         border: 1px solid oklch(0.9 0 0);
         background: var(--bg);
         font-family: var(--font-body);
-        max-width: 200px;
     }
 
     .radio-group {
@@ -234,23 +233,16 @@
         animation: fadeIn 0.5s ease-out;
     }
 
-    .saju-main-layout {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .saju-visual-section {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .saju-eight-chars {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     .char-box {
@@ -277,74 +269,22 @@
         color: var(--primary);
     }
 
-    .saju-analysis-card {
+    .fortune-report {
         background: oklch(0.98 0.02 250);
         padding: 1.5rem;
         border-radius: 20px;
-        border-left: 5px solid var(--accent);
+        margin-bottom: 1.5rem;
     }
 
-    .saju-analysis-card h4 {
-        margin: 0 0 0.75rem 0;
-        font-size: 1.1rem;
-        color: var(--text);
-    }
-
-    .fortune-details-section {
-        background: var(--surface);
-        padding: 2rem;
-        border-radius: 24px;
-        box-shadow: var(--shadow);
-    }
-
-    .fortune-details-section h4 {
-        margin: 0 0 1.5rem 0;
+    .fortune-report h4 {
+        margin: 0 0 1rem 0;
         font-family: var(--font-heading);
-        font-size: 1.4rem;
-        color: var(--primary);
+        font-size: 1.25rem;
     }
 
-    .fortune-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-
-    .fortune-item {
-        padding-bottom: 1rem;
-        border-bottom: 1px dashed oklch(0.9 0 0);
-    }
-
-    .fortune-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .fortune-item strong {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-size: 1rem;
-        color: var(--text);
-    }
-
-    .fortune-item p {
+    .fortune-report p {
         margin: 0;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        opacity: 0.85;
-    }
-
-    @media (min-width: 1024px) {
-        .saju-main-layout {
-            flex-direction: row;
-            align-items: flex-start;
-        }
-        .saju-visual-section {
-            flex: 1;
-        }
-        .fortune-details-section {
-            flex: 1.5;
-        }
+        line-height: 1.7;
     }
 
     .recommendations {
@@ -507,7 +447,7 @@
 
     textarea#text-input {
         width: 100%;
-        height: 250px;
+        height: 500px;
         border: 1px solid oklch(0.9 0 0);
         border-radius: 16px;
         padding: 1.25rem;
@@ -578,6 +518,47 @@
         color: var(--accent);
         font-weight: 500;
         height: 1.2em;
+    }
+
+    /* Settings Gear Button */
+    .settings-btn {
+        padding: 0.5rem 1.25rem;
+        border: 1px solid oklch(0.85 0 0);
+        background: var(--surface);
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: 600;
+        font-family: var(--font-body);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: var(--shadow);
+    }
+    .settings-btn:hover {
+        background: oklch(0.97 0 0);
+        transform: translateY(-1px);
+        border-color: var(--primary);
+    }
+
+    /* Fallback Warning Box */
+    .saju-fallback-notice {
+        margin-top: 1.25rem;
+        background: oklch(0.98 0.01 50 / 0.8);
+        border-left: 4px solid var(--accent);
+        border-radius: 12px;
+        padding: 1rem;
+        font-size: 0.85rem;
+        line-height: 1.5;
+        color: oklch(0.3 0.02 50);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .saju-fallback-notice a {
+        color: var(--primary);
+        font-weight: bold;
+        text-decoration: underline;
     }
 }
 
