@@ -1,14 +1,46 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Base | 퍼스널 대시보드</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <header>
+        <div class="header-content">
+            <h1 id="greeting">안녕하세요!</h1>
+            <div id="live-clock">00:00:00</div>
+            <div id="live-date">2026년 5월 27일 수요일</div>
+        </div>
+        <button id="lang-toggle">English</button>
+    </header>
+
+    <nav id="main-tabs">
+        <button class="tab-btn active" data-tab="daily">
+            <span class="icon">🔮</span>
+            <span class="label">오늘의 운세</span>
+        </button>
+        <button class="tab-btn" data-tab="imageConverter">
+            <span class="icon">🖼️</span>
+            <span class="label">사진 변환</span>
+        </button>
+        <button class="tab-btn" data-tab="textTools">
+            <span class="icon">📝</span>
+            <span class="label">글자수/맞춤법</span>
+        </button>
+    </nav>
+
+    <main id="dashboard-content">
+        <!-- Content will be injected by main.js -->
+    </main>
+
+    <script src="main.js?v=2"></script>
 </body>
 </html>
