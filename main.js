@@ -282,10 +282,30 @@ function setupSajuForm() {
 
             if (!response.ok) throw new Error('API 호출 실패');
             
-            const result = await response.json();
             const responseText = result.candidates[0].content.parts[0].text;
-            const cleanedText = responseText.replace(/```json|```/g, '').trim();
-            const fortuneData = JSON.parse(cleanedText);
+            let fortuneData;
+            try {
+                // 마크다운 블록 제거 및 클리닝
+                const cleanedText = responseText.replace(/```json|```/g, '').trim();
+                fortuneData = JSON.parse(cleanedText);
+                
+                // 필수 필드 체크 (데이터 구조가 불완전할 경우 기본값 채우기)
+                if (!fortuneData.fortunes) {
+                    fortuneData.fortunes = getMockSajuData().fortunes;
+                }
+                if (!fortuneData.sajuAnalysis) {
+                    fortuneData.sajuAnalysis = getMockSajuData().sajuAnalysis;
+                }
+            } catch (e) {
+                console.error("Gemini Parsing Error:", responseText);
+                // 파싱 실패 시 정규표현식으로 재시도
+                const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+                if (jsonMatch) {
+                    fortuneData = JSON.parse(jsonMatch[0]);
+                } else {
+                    throw new Error('데이터 해석 실패');
+                }
+            }
 
             renderSajuResult({
                 saju: { ganji: [sajuData.year, sajuData.month, sajuData.day, sajuData.hour] },
@@ -293,7 +313,11 @@ function setupSajuForm() {
             });
         } catch (error) {
             console.error('Fortune Error:', error);
-            renderSajuResult(getMockSajuData());
+            // 에러 시 사용자에게 데모 데이터를 보여주되, 상황을 설명함
+            renderSajuResult({
+                ...getMockSajuData(),
+                isDemo: true
+            });
         } finally {
             getFortuneBtn.disabled = false;
             getFortuneBtn.textContent = currentLang === 'ko' ? '운세 보기' : 'Get Fortune';
@@ -305,10 +329,11 @@ function renderSajuResult(data) {
     const resultContainer = document.getElementById('saju-result-container');
     resultContainer.style.display = 'block';
     
-    const { saju, fortune } = data;
-    const [y, m, d, h] = saju.ganji;
+    const { saju, fortune, isDemo } = data;
+    const [y, m, d, h] = saju ? saju.ganji : ["-", "-", "-", "-"];
 
     resultContainer.innerHTML = `
+        ${isDemo ? `<div style="padding: 10px; background: #fff5f5; border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem; color: #e53e3e; text-align: center;">⚠️ AI 응답 지연으로 인해 예시 데이터가 표시됩니다. 잠시 후 다시 시도해 주세요.</div>` : ''}
         <div class="saju-main-layout">
             <div class="saju-visual-section">
                 <div class="saju-eight-chars">

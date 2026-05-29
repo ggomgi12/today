@@ -134,6 +134,12 @@ A critical function of the AI is to continuously monitor for and automatically r
 
 The AI's workflow is iterative, transparent, and responsive to user input.
 
+*   **배포 전 검증 프로세스 (Deployment Verification):** 코드를 GitHub에 푸시하거나 실제 서버에 배포하기 전, 반드시 다음 사항을 확인한다.
+    1. **문법 검사:** JS/CSS 오타 및 문법 오류 여부 확인.
+    2. **로직 시뮬레이션:** 복잡한 연산은 로컬 환경에서 테스트 코드로 검증.
+    3. **정합성 체크:** 사용자 요청 사항 반영 여부 및 UI 레이아웃 정상 작동 확인.
+    4. **사전 보고:** 수정 사항과 검증 내용을 사용자에게 요약 보고 후 배포 진행.
+
 * **Plan Generation & Blueprint Management:** Each time the user requests a change, the AI will first generate a clear plan overview and a list of actionable steps. This plan will then be used to **create or update a blueprint.md file** in the project's root directory.
   * The `blueprint.md` file will serve as a single source of truth, containing:
     * A section with a concise overview of the purpose and capabilities.
